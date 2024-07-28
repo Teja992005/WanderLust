@@ -11,11 +11,13 @@
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input name="listing[title]" placeholder="Add a catchy title" type="text" class="form-control" required>
-            
+            <div class="valid-feedback">Title looks good!</div>
         </div>
        <div class="mb-3"> 
         <label for="description" class="form-label">Description</label>
         <textarea name="listing[description]" placeholder="enter description"  class="form-control" required></textarea>
+        <div
+        class="invalid-feedback">Please enter a short description!</div>
        </div>
        <div class="mb-3">
         <label for="image" class="form-label">Image</label>
@@ -25,16 +27,22 @@
         <div class="mb-3 col-md-4">
             <label for="price" class="form-label">price</label>
             <input name="listing[price]" placeholder="1200 "type="number" class="form-control" required>
+            <div class="invalid-feedback">Price should be valid!</div>
            </div>
            <div class="mb-3 col-md-8">
             <label for="country" class="form-label">Country</label>
             <input name="listing[country]" placeholder="India" type="text" class="form-control" required>
+            <div
+            class="invalid-feedback">Country name should be valid!</div>
            </div>
        </div>
        
        <div class="mb-3">
         <label for="location" class="form-label">Location</label>
         <input name="listing[location]" placeholder="Guntur, Andhra Pradesh" type="text" class="form-control" required>
+        <div
+        class="invalid-feedback">Location should be valid!</div>
+       </div>
        </div>
        <br> <br>
         <button class="btn btn-dark add-btn mt-3">Add</button>
