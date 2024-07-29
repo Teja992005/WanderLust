@@ -94,6 +94,7 @@ body{
 .add-btn{
     background-color: #fe424d !important;
     border: none !important;
+    
 }
 
 /* Edit Page */
@@ -109,6 +110,7 @@ body{
 
 .btns{
     display: flex;
+    
 }
 .show-card{
     padding-left: 0;
