@@ -5,102 +5,59 @@ const router = express.Router();
 
 const Listing = require("../models/listing.js");
 const wrapAsync = require("../utils/WrapAsync.js");
-const ExpressError = require("../utils/ExpressError.js");
-const {listingSchema} = require("../schema.js");
-const {isLoggedIn} = require("../middleware.js");
-const validateListing = (req,res,next) =>{
-    let {error} = listingSchema.validate(req.body);
+const {isLoggedIn,isOwner,validateListing} = require("../middleware.js");
+const { populate } = require("../models/review.js");
 
-if(error){
-    let errMsg = err.details.map((el) => el.message).join(", ");
-    throw new ExpressError(400,errMsg);
-}else{
-    next();
-}
-}
-
-// Index Route
-router.get("/",wrapAsync(async (req,res) =>{
-    const allListings = await Listing.find();
-    res.render("listings/index.ejs",{allListings});
-}));
+const listingController = require("../controllers/listings.js");
+// below two are used when we are included choose file option in the new.ejs file
+const multer = require("multer");
+const {storage} = require("../cloudConfig.js");
+const upload = multer({storage});
+router
+   .route("/")
+   .get(wrapAsync(listingController.index))
+   .post(isLoggedIn,upload.single('listing[image]'),validateListing,wrapAsync(listingController.createListing));
+   
+   
 
 //New Route
-router.get("/new",isLoggedIn,(req,res) =>{
-    res.render("listings/new.ejs");
-});
+router.get("/new",isLoggedIn,listingController.renderNewForm);
+
+router
+   .route("/:id")
+   .get(wrapAsync(listingController.showListing))
+   .put(isLoggedIn,isOwner,
+      upload.single('listing[image]'),validateListing,wrapAsync(listingController.updateListing))
+   .delete(isLoggedIn,isOwner,wrapAsync(listingController.destroyListing));
+
+
+
+
+
+// Index Route
+// router.get("/",wrapAsync(listingController.index));
+
+
 
 
 // Show Route
-router.get("/:id",wrapAsync(async (req,res) =>{
-    let {id} = req.params;
-    const listing = await Listing.findById(id).populate("reviews");
-    if(!listing){
-        req.flash("error","Listing you requested for does not exist!");
-        res.redirect("/listings");
-    }
-    res.render("listings/show.ejs",{listing});
-}));
+// router.get("/:id",wrapAsync(listingController.showListing));
 
 
 // Create Route
 
-router.post("/",isLoggedIn,validateListing,wrapAsync(async (req,res,next) =>{
-    
-    // let {title,description,image,price,country,location} = req.body;
-   
-    const newListing = new Listing(req.body.listing);
-    await newListing.save();
-    req.flash("success","New Listing Created!");
-    res.redirect("/listings");
-      
-      
-   }));
+// router.post("/",isLoggedIn,validateListing,wrapAsync(listingController.createListing));
    
    
    // Edit Route
-   router.get("/:id/edit",isLoggedIn,wrapAsync(async (req,res) =>{
-       let {id} = req.params;
-       const listing = await Listing.findById(id);
-       if(!listing){
-        req.flash("error","Listing you requested for does not exist!");
-        res.redirect("/listings");
-    }
-       res.render("listings/edit.ejs",{listing});
-   }));
+   router.get("/:id/edit",isLoggedIn,isOwner,wrapAsync(listingController.renderEditForm));
    
    // Update Route
    
-   router.put("/:id",isLoggedIn,validateListing,wrapAsync(async (req,res) =>{
-       let {id} = req.params;
-       await Listing.findByIdAndUpdate(id,{...req.body.listing});
-       req.flash("success","Listing Updated!");
-       res.redirect(`/listings/${id}`);
-   }));
+   // router.put("/:id",isLoggedIn,isOwner,validateListing,wrapAsync(listingController.updateListing));
    
    
    //Delete Route
    
-   router.delete("/:id",isLoggedIn,wrapAsync(async (req,res) =>{
-       let {id} = req.params;
-       let deletedListing = await Listing.findByIdAndDelete(id);
-       req.flash("success","Listing deleted!");
-       console.log(deletedListing);
-       res.redirect("/listings");
-   }));
-   
-   router.get("/testListing",wrapAsync(async (req,res) =>{
-       let sampleListing = new Listing({
-           title: "My New Villa",
-           description: "By the beach",
-           price: 1200,
-           location: "Calangute, Goa",
-           country : "India",
-       });
-       await sampleListing.save();
-       console.log("sample was saved");
-       res.send("successuful testing");
-   
-   }));
-
+   // router.delete("/:id",isLoggedIn,isOwner,wrapAsync(listingController.destroyListing));
 module.exports = router;
